@@ -7,5 +7,5 @@ decision_tree = classifier.decisionTreeTrain(dataset[0],
                                              [label[0] for label in dataset[1:]])
 accuracy = classifier.measure_accuracy(decision_tree,
                                   [[value for index, value in enumerate(feature) if index != 0] for feature in dataset[1:]],
-                                  dataset[0][::-1])
+                                  dataset[0])
 print('Accuracy of decision tree model is: %f' %accuracy)

@@ -4,22 +4,21 @@ from Tree import Node
 class DecisionTreeClassifier:
     def decisionTreeTrain(self, data, remainingFeatures, labels):
         guess = self.mostFrequentData(data)          # guess = most frequent answer in data
-        data.sort()
         if len(remainingFeatures) == 1:              # base case: cannot split further
             return Node(guess, True)
-        if data[0] == data[-1]:                      # base case: no need to split further
+        if self.checkSameData(data):                      # base case: no need to split further
             return Node(guess, True)
         else:                                        # we need to query more features
             score = 0
             yes = []
             no = []
-            featureIndex = -1;
-            removeIndex = -1;
+            featureIndex = -1
+            removeIndex = -1
             yesSelectedRemainingFeatures = []
             noSelectedRemainingFeatures = []
             for index, feature in enumerate(remainingFeatures):
-                tempYes, tempYesSelectedRemainingFeatures = self.dataSubset("y", feature, remainingFeatures, data)
-                tempNo, tempNoSelectedRemainingFeatures = self.dataSubset("n", feature, remainingFeatures, data)
+                tempNo, tempNoSelectedRemainingFeatures = self.dataSubset('n', feature, remainingFeatures, data)
+                tempYes, tempYesSelectedRemainingFeatures = self.dataSubset('y', feature, remainingFeatures, data)
                 tempScore = self.majorityVote(tempYes)+self.majorityVote(tempNo)
                 if tempScore > score:
                     score = tempScore
@@ -33,6 +32,13 @@ class DecisionTreeClassifier:
             right = self.decisionTreeTrain(yes, self.remove_selected_feature(yesSelectedRemainingFeatures, removeIndex), labels)
             return Node(score, False, left, right, featureIndex)
 
+    def checkSameData(self, data):
+        for i in data:
+            if data[0] != i:
+                return False
+        return True
+
+
     def mostFrequentData(self, data):
         arrayCount = [0]*2
         for i in data:
@@ -40,16 +46,16 @@ class DecisionTreeClassifier:
         return arrayCount.index(max(arrayCount))
 
     def dataSubset(self, polarity, feature, remainingFeatures, result_set):
-        remove_indices = []
+        remaining_indices = []
         for index, item in enumerate(feature):
             if item == polarity:
-                remove_indices.append(index)
-        return [result for i, result in enumerate(result_set) if i+1 not in remove_indices],\
-               [[element for idx, element in enumerate(feature) if idx not in remove_indices]
+                remaining_indices.append(index)
+        return [result for i, result in enumerate(result_set) if i+1 in remaining_indices ],\
+               [[element for idx, element in enumerate(feature) if idx in remaining_indices or idx == 0]
                 for index, feature in enumerate(remainingFeatures)]
 
     def majorityVote(self, feature):
-        arrayCount = [0] * 2;
+        arrayCount = [0] * 2
         for i in feature:
             arrayCount[i] += 1
         return max(arrayCount)
